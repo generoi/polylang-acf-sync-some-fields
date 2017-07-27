@@ -32,8 +32,8 @@ if (!class_exists('PolylangSyncSomeFieldsWatch')) :
         private function __construct()
         {
             add_filter('pll_copy_post_metas', array(&$this, 'filter_keys'), 20, 3);
-            add_action('acf/create_field_options', array(&$this, 'action_acf_create_field_options'), 10, 1);
-            add_action('acf/create_field', array(&$this, 'action_acf_create_field'), 10, 1);
+            add_action('acf/render_field_settings', array(&$this, 'action_acf_create_field_options'), 10, 1);
+            add_action('acf/render_field', array(&$this, 'action_acf_create_field'), 10, 1);
             add_action('init', array(&$this, 'register_strings'));
         }
 
@@ -59,16 +59,15 @@ if (!class_exists('PolylangSyncSomeFieldsWatch')) :
                 return;
             }
             $return = array();
-            $return = apply_filters('acf/get_field_groups', $return);
+            $return = acf_get_field_groups();
             foreach($return as $group) {
-                $lang = pll_get_post_language($group['id']);
+                $lang = pll_get_post_language($group['ID']);
                 if ($lang != 'en') {
                     continue;
                 }
-                pll_register_string('group_' . $group['id'] . '_title', $group['title']);
+                pll_register_string('group_' . $group['ID'] . '_title', $group['title']);
 
-                $fields = array();
-                $fields = apply_filters('acf/field_group/get_fields', $fields, $group['id']);
+                $fields = acf_get_fields($group['ID']);
 
                 foreach($fields as $field) {
                     pll_register_string($field['key'] . '_label', $field['label']);
@@ -111,25 +110,19 @@ if (!class_exists('PolylangSyncSomeFieldsWatch')) :
          */
         public function action_acf_create_field_options($field)
         {
-            ?>
-            <tr class="foo" data-field_name="<?php echo $field['key']; ?>">
-                <td class="label"><label>Sync Field between Languages</label></td>
-                <td>
-                    <?php
-                    do_action('acf/create_field', array(
-                        'type' => 'radio',
-                        'name' => 'fields[' . $field['key'] . '][lang_sync]',
-                        'value' => isset($field['lang_sync']) ? $field['lang_sync'] : 1,
-                        'choices' => array(
-                            1 => __("Yes", 'acf'),
-                            0 => __("No", 'acf'),
-                        ),
-                        'layout' => 'horizontal',
-                    ));
-                    ?>
-                </td>
-            </tr>
-            <?php
+            acf_render_field_setting( $field, array(
+                'label'         => __('Sync Field between Languages'),
+                'instructions'  => '',
+                'type' => 'radio',
+                'name' => 'lang_sync',
+                'value' => isset($field['lang_sync']) ? $field['lang_sync'] : 1,
+                'choices' => array(
+                    1 => __("Yes", 'acf'),
+                    0 => __("No", 'acf'),
+                ),
+                'layout' => 'horizontal',
+                'required'          => 1,
+            ), true);
         }
     }
 
