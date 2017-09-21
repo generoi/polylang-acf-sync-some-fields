@@ -53,7 +53,7 @@ class PolylangSyncSomeFields {
 
 	/**
 	 *	Setup plugin
-	 *	
+	 *
 	 *	@action 'plugins_loaded'
 	 */
 	function plugins_loaded() {
@@ -72,7 +72,7 @@ endif;
  * @param string $classname
  */
 function polylang_sync_some_fields_autoload( $classname ) {
-	$class_path = dirname(__FILE__). sprintf('/include/class-%s.php' , $classname ) ; 
+	$class_path = dirname(__FILE__). sprintf('/include/class-%s.php' , $classname ) ;
 	if ( file_exists($class_path) )
 		require_once $class_path;
 }
